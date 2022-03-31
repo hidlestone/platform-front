@@ -5,11 +5,13 @@ import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: 'http://127.0.0.1:7070/payn', // url = base url + request url
+  // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
 
+// 请求拦截器
 // request interceptor
 service.interceptors.request.use(
   config => {
@@ -30,6 +32,7 @@ service.interceptors.request.use(
   }
 )
 
+// 响应拦截器
 // response interceptor
 service.interceptors.response.use(
   /**
@@ -46,7 +49,7 @@ service.interceptors.response.use(
     const res = response.data
 
     // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
+    if (res.code != '0000') {
       Message({
         message: res.message || 'Error',
         type: 'error',

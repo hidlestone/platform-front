@@ -1,9 +1,11 @@
-import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getInfo, login, logout } from '@/api/user'
+import { getToken, removeToken, setToken, setTokenWithType } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
 const state = {
   token: getToken(),
+  accesstoken: '',
+  refreshtoken: '',
   name: '',
   avatar: '',
   introduction: '',
@@ -13,6 +15,13 @@ const state = {
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
+  },
+  // 设置token
+  SET_ACCESSTOKEN: (state, accesstoken) => {
+    state.accesstoken = accesstoken
+  },
+  SET_REFRESHTOKEN: (state, refreshtoken) => {
+    state.accesstoken = refreshtoken
   },
   SET_INTRODUCTION: (state, introduction) => {
     state.introduction = introduction
@@ -35,8 +44,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+        commit('SET_TOKEN', response.data.accesstoken)
+        commit('SET_ACCESSTOKEN', response.data.accesstoken)
+        commit('SET_REFRESHTOKEN', response.data.refreshtoken)
+        // 设置双token
+        setTokenWithType('accesstoken', response.data.accesstoken)
+        setTokenWithType('refreshtoken', response.data.refreshtoken)
         resolve()
       }).catch(error => {
         reject(error)
