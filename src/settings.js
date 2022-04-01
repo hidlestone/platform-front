@@ -1,5 +1,7 @@
+// 系统默认配置
 module.exports = {
-  title: 'Vue Element Admin',
+  // 页面标题
+  title: 'Fall PLatform',
 
   /**
    * @type {boolean} true | false

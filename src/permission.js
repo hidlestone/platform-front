@@ -3,13 +3,15 @@ import store from './store'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
-import { getToken } from '@/utils/auth' // get token from cookie
+// 获取token方法
+import { getAccessToken, getRefreshToken, getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
-
+// 访问URL白名单
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
+// 【在每次请求之前】
 router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
@@ -18,8 +20,9 @@ router.beforeEach(async(to, from, next) => {
   document.title = getPageTitle(to.meta.title)
 
   // determine whether the user has logged in
-  const hasToken = getToken()
-
+  // const hasToken = getToken()
+  const hasToken = getAccessToken() && getRefreshToken()
+  // 存在token
   if (hasToken) {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
@@ -28,15 +31,23 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // determine whether the user has obtained his permission roles through getInfo
       const hasRoles = store.getters.roles && store.getters.roles.length > 0
+      // 当前store中是否存在角色(登录时返回的)
       if (hasRoles) {
+        // 根据角色生成访问路由
+        const { roles } = store.getters.roles
+        const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
         next()
       } else {
+        // 当前用户不存在角色，则重新调用获取用户信息的接口
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
+          // const { roles } = await store.dispatch('user/getInfo')
+          // 获取用户角色信息
           const { roles } = await store.dispatch('user/getInfo')
 
           // generate accessible routes map based on roles
+          // 根据角色生成访问路由
           const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
 
           // dynamically add accessible routes
@@ -56,7 +67,7 @@ router.beforeEach(async(to, from, next) => {
     }
   } else {
     /* has no token*/
-
+    // 不存在token，则判断是否在白名单内
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()

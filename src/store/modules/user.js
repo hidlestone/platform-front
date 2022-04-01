@@ -1,17 +1,28 @@
 import { getInfo, login, logout } from '@/api/user'
-import { getToken, removeToken, setToken, setTokenWithType } from '@/utils/auth'
+import {
+  getAccessToken,
+  getRefreshToken,
+  getToken,
+  removeToken,
+  setAccessToken,
+  setRefreshToken,
+  setToken,
+  setTokenWithType
+} from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
+// 单一状态树
 const state = {
   token: getToken(),
-  accesstoken: '',
-  refreshtoken: '',
+  accesstoken: getAccessToken(),
+  refreshtoken: getRefreshToken(),
   name: '',
   avatar: '',
   introduction: '',
   roles: []
 }
 
+// 更改 Vuex 的 store 中的状态的唯一方法是提交 mutation。Vuex 中的 mutation 非常类似于事件
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
@@ -44,12 +55,26 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
+        if (!data) {
+          reject('Verification failed, please Login again.')
+        }
+        // 一、存储返回信息
+        // 1.1、存储token
         commit('SET_TOKEN', response.data.accesstoken)
         commit('SET_ACCESSTOKEN', response.data.accesstoken)
         commit('SET_REFRESHTOKEN', response.data.refreshtoken)
-        // 设置双token
-        setTokenWithType('accesstoken', response.data.accesstoken)
-        setTokenWithType('refreshtoken', response.data.refreshtoken)
+        // 1.2、存储用户相关信息
+        // roles must be a non-empty array
+        if (!response.data.roles || response.data.roles.length <= 0) {
+          reject('roles must be a non-null array!')
+        }
+        commit('SET_ROLES', response.data.roles)
+        commit('SET_NAME', response.data.curUserInfo.username)
+        commit('SET_AVATAR', response.data.curUserInfo.avatar)
+        commit('SET_INTRODUCTION', response.data.curUserInfo.introduction)
+        // 二、设置token，存储token到cookie中
+        setAccessToken(response.data.accesstoken)
+        setRefreshToken(response.data.refreshtoken)
         resolve()
       }).catch(error => {
         reject(error)
@@ -58,16 +83,16 @@ const actions = {
   },
 
   // get user info
+  // 重新获取用户信息
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo(state.accesstoken).then(response => {
         const { data } = response
-
         if (!data) {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name, avatar, introduction } = data
+        const { roles, username, avatar, introduction } = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -75,7 +100,7 @@ const actions = {
         }
 
         commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        commit('SET_NAME', username)
         commit('SET_AVATAR', avatar)
         commit('SET_INTRODUCTION', introduction)
         resolve(data)
@@ -86,12 +111,19 @@ const actions = {
   },
 
   // user logout
+  // 用户登出
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
-        commit('SET_TOKEN', '')
+      logout(state.accesstoken).then(() => {
+        // 清空token状态state
+        commit('SET_TOKEN', null)
+        commit('SET_ACCESSTOKEN', null)
+        commit('SET_REFRESHTOKEN', null)
+        // 清空角色
         commit('SET_ROLES', [])
+        // 清空cookie中的token
         removeToken()
+        // 重置route
         resetRouter()
 
         // reset visited views and cached views
@@ -109,6 +141,8 @@ const actions = {
   resetToken({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
+      commit('SET_ACCESSTOKEN', null)
+      commit('SET_REFRESHTOKEN', null)
       commit('SET_ROLES', [])
       removeToken()
       resolve()

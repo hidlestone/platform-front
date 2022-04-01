@@ -9,17 +9,20 @@ export function login(data) {
   })
 }
 
-export function getInfo(token) {
+// 获取用户信息
+export function getInfo(accesstoken) {
   return request({
-    url: '/user/info',
+    url: '/user/getuserinfo',
     method: 'get',
-    params: { token }
+    params: { accesstoken }
   })
 }
 
-export function logout() {
+// 用户登出
+export function logout(accesstoken) {
   return request({
     url: '/user/logout',
-    method: 'post'
+    method: 'get',
+    params: { accesstoken }
   })
 }

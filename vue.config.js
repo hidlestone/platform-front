@@ -1,5 +1,6 @@
 'use strict'
 const path = require('path')
+// 导入默认配置
 const defaultSettings = require('./src/settings.js')
 
 function resolve(dir) {
@@ -8,6 +9,7 @@ function resolve(dir) {
 
 const name = defaultSettings.title || 'vue Element Admin' // page title
 
+// 前端访问端口
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
 // For example, Mac: sudo npm run
