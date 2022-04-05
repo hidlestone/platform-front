@@ -4,7 +4,7 @@ import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 // 获取token方法
-import { getAccessToken, getRefreshToken, getToken } from '@/utils/auth' // get token from cookie
+import { getAccessToken, getRefreshToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
@@ -12,17 +12,16 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
 // 【在每次请求之前】
+// 全局钩子router.beforeEach
 router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
-
   // set page title
   document.title = getPageTitle(to.meta.title)
-
+  // 当前是否已经登录，即存在token
   // determine whether the user has logged in
   // const hasToken = getToken()
   const hasToken = getAccessToken() && getRefreshToken()
-  // 存在token
   if (hasToken) {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
@@ -30,12 +29,10 @@ router.beforeEach(async(to, from, next) => {
       NProgress.done() // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
     } else {
       // determine whether the user has obtained his permission roles through getInfo
+      console.log(store.getters.roles)
       const hasRoles = store.getters.roles && store.getters.roles.length > 0
-      // 当前store中是否存在角色(登录时返回的)
+      // 当前store中是否存在角色信息
       if (hasRoles) {
-        // 根据角色生成访问路由
-        const { roles } = store.getters.roles
-        const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
         next()
       } else {
         // 当前用户不存在角色，则重新调用获取用户信息的接口
@@ -67,7 +64,7 @@ router.beforeEach(async(to, from, next) => {
     }
   } else {
     /* has no token*/
-    // 不存在token，则判断是否在白名单内
+    // 不存在token，则判断是否在白名单内，不存在则重定向到登录页
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()

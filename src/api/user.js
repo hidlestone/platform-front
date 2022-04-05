@@ -10,11 +10,10 @@ export function login(data) {
 }
 
 // 获取用户信息
-export function getInfo(accesstoken) {
+export function getInfo() {
   return request({
     url: '/user/getuserinfo',
-    method: 'get',
-    params: { accesstoken }
+    method: 'get'
   })
 }
 

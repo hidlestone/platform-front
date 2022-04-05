@@ -1,16 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
-Vue.use(Router)
-
 /* Layout */
 import Layout from '@/layout'
-
 /* Router Modules */
 import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
+
+Vue.use(Router)
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -34,6 +32,7 @@ import nestedRouter from './modules/nested'
  */
 
 /**
+ * 常量路由，所有的角色都可以访问
  * constantRoutes
  * a base page that does not have permission requirements
  * all roles can be accessed
@@ -125,6 +124,7 @@ export const constantRoutes = [
 ]
 
 /**
+ * 动态路由，根据角色进行动态加载
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
  */
@@ -161,7 +161,8 @@ export const asyncRoutes = [
       },
       {
         path: 'role',
-        component: () => import('@/views/permission/role'),
+        // component: () => import('@/views/permission/role'),
+        component: () => import('@/views/systemmanagement/role'),
         name: 'RolePermission',
         meta: {
           title: 'Role Permission',

@@ -1,5 +1,5 @@
 import { asyncRoutes, constantRoutes } from '@/router'
-import store from '../index'
+import { getAllMenus } from '@/api/permission'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -48,20 +48,61 @@ const mutations = {
 }
 
 const actions = {
+  // 根据角色获取路由
   generateRoutes({ commit }, roles) {
-    // 如果不存在则从store中获取
-    if (!roles) {
-      roles = store.getters.roles
-    }
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       let accessedRoutes
-      if (roles.includes('admin')) {
-        accessedRoutes = asyncRoutes || []
-      } else {
-        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-      }
-      commit('SET_ROUTES', accessedRoutes)
-      resolve(accessedRoutes)
+      // 获取当前用户可以访问的菜单路由
+      getAllMenus().then(response => {
+        const { data } = response
+        const routeArr = []
+        for (let i = 0, len = data.length; i < len; i++) {
+          const children = []
+          const childrenTmp = data[i].children
+          for (let i = 0, len = childrenTmp.length; i < len; i++) {
+            let route = {
+              path: childrenTmp[i].path,
+              // component: () => import('@/views/systemmanagement/role'),
+              component: () => import(`@/views/${childrenTmp[i].component}`),
+              // component: resolve => require([`@/views/${childrenTmp[i].component}`], resolve),
+              redirect: childrenTmp[i].redirect,
+              /*alwaysShow: childrenTmp[i].alwaysShow,*/
+              name: childrenTmp[i].name,
+              meta: {
+                title: childrenTmp[i].meta.title,
+                /*icon: childrenTmp[i].meta.icon,*/
+                roles: []
+              }
+            }
+            children.push(routeSub)
+          }
+          let route = {
+            path: data[i].path,
+            component: data[i].component,
+            redirect: data[i].redirect,
+            alwaysShow: data[i].alwaysShow,
+            name: data[i].name,
+            children: children,
+            meta: {
+              title: data[i].meta.title,
+              icon: data[i].meta.icon,
+              roles: null
+            }
+          }
+          routeArr.push(route)
+        }
+        // 如果是admin则使用当前设置的全量路由
+        if (roles.includes('admin')) {
+          accessedRoutes = asyncRoutes || []
+        } else {
+          accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
+        }
+        const allRoute = routeArr.concat(accessedRoutes)
+        commit('SET_ROUTES', allRoute)
+        resolve(allRoute)
+      }).catch(error => {
+        reject(error)
+      })
     })
   }
 }

@@ -6,6 +6,10 @@ export function getToken() {
   return Cookies.get(TokenKey)
 }
 
+export function setToken(token) {
+  return Cookies.set(TokenKey, token)
+}
+
 // 获取访问token
 export function getAccessToken() {
   return Cookies.get('accesstoken')
@@ -24,10 +28,6 @@ export function setAccessToken(token) {
 // 设置刷新token
 export function setRefreshToken(token) {
   return Cookies.set('refreshtoken', token)
-}
-
-export function setToken(token) {
-  return Cookies.set(TokenKey, token)
 }
 
 // 根据类型设置token

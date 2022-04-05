@@ -50,7 +50,7 @@
       <div style="position:relative">
         <div class="tips">
           <span>Username : admin</span>
-          <span>Password : any</span>
+          <span>Password : admin</span>
         </div>
         <div class="tips">
           <span style="margin-right:18px;">Username : editor</span>
@@ -78,9 +78,11 @@ import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 
 export default {
+  // 组件导出的名称
   name: 'Login',
   components: { SocialSign },
   data() {
+    // 校验用户名
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
         callback(new Error('Please enter the correct user name'))
@@ -88,6 +90,7 @@ export default {
         callback()
       }
     }
+    // 校验密码
     const validatePassword = (rule, value, callback) => {
       if (value.length < 4) {
         callback(new Error('The password can not be less than 4 digits'))
@@ -159,9 +162,8 @@ export default {
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
               console.log('handleLogin')
+              // 登录成功之后重定向到首页
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-              console.log(this.redirect || '/')
-              console.log(this.$router)
               this.loading = false
             })
             .catch(() => {

@@ -6,8 +6,7 @@ import {
   removeToken,
   setAccessToken,
   setRefreshToken,
-  setToken,
-  setTokenWithType
+  setToken
 } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -32,7 +31,7 @@ const mutations = {
     state.accesstoken = accesstoken
   },
   SET_REFRESHTOKEN: (state, refreshtoken) => {
-    state.accesstoken = refreshtoken
+    state.refreshtoken = refreshtoken
   },
   SET_INTRODUCTION: (state, introduction) => {
     state.introduction = introduction
@@ -49,29 +48,21 @@ const mutations = {
 }
 
 const actions = {
-  // user login
+  // 用户账号密码登录-->只获取到token
   login({ commit }, userInfo) {
+    // 声明变量
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
         if (!data) {
-          reject('Verification failed, please Login again.')
+          reject(response.message)
         }
         // 一、存储返回信息
         // 1.1、存储token
         commit('SET_TOKEN', response.data.accesstoken)
         commit('SET_ACCESSTOKEN', response.data.accesstoken)
         commit('SET_REFRESHTOKEN', response.data.refreshtoken)
-        // 1.2、存储用户相关信息
-        // roles must be a non-empty array
-        if (!response.data.roles || response.data.roles.length <= 0) {
-          reject('roles must be a non-null array!')
-        }
-        commit('SET_ROLES', response.data.roles)
-        commit('SET_NAME', response.data.curUserInfo.username)
-        commit('SET_AVATAR', response.data.curUserInfo.avatar)
-        commit('SET_INTRODUCTION', response.data.curUserInfo.introduction)
         // 二、设置token，存储token到cookie中
         setAccessToken(response.data.accesstoken)
         setRefreshToken(response.data.refreshtoken)
@@ -86,19 +77,16 @@ const actions = {
   // 重新获取用户信息
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.accesstoken).then(response => {
+      getInfo().then(response => {
         const { data } = response
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-
         const { roles, username, avatar, introduction } = data
-
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
-
         commit('SET_ROLES', roles)
         commit('SET_NAME', username)
         commit('SET_AVATAR', avatar)

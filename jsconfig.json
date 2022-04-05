@@ -1,9 +1,12 @@
-{ 
+{
   "compilerOptions": {
+    // 用于解析非相关模块名称的基目录。
     "baseUrl": "./",
+    // 指定相对于 baseUrl 选项计算的路径映射。
     "paths": {
         "@/*": ["src/*"]
     }
   },
+  // 该exclude属性（全局模式）告诉语言服务哪些文件不属于您的源代码。这使性能保持在高水平。
   "exclude": ["node_modules", "dist"]
 }

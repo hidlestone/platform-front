@@ -85,9 +85,18 @@ const asyncRoutes = [
     },
     children: [
       {
+        path: 'role',
+        component: 'views/systemmanagement/role',
+        name: '角色管理',
+        meta: {
+          title: '角色管理',
+          roles: ['admin']
+        }
+      },
+      {
         path: 'page',
         component: 'views/permission/page',
-        name: 'PagePermission',
+        name: 'PagePermission000',
         meta: {
           title: 'Page Permission',
           roles: ['admin']
@@ -102,7 +111,7 @@ const asyncRoutes = [
         }
       },
       {
-        path: 'role',
+        path: 'role2',
         component: 'views/permission/role',
         name: 'RolePermission',
         meta: {

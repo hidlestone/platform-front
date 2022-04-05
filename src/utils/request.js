@@ -1,14 +1,15 @@
 import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
+import { Message, MessageBox } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import { getAccessToken, getRefreshToken, getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
+  // 基础URL，完整路径才会替换原来的
   baseURL: 'http://127.0.0.1:7070/payn', // url = base url + request url
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  timeout: 10000 // request timeout 超时时间：10S
 })
 
 // 请求拦截器
@@ -23,6 +24,12 @@ service.interceptors.request.use(
       // please modify it according to the actual situation
       config.headers['X-Token'] = getToken()
     }
+    // 请求头设置token
+    if ((store.getters.accesstoken) && (store.getters.refreshtoken)) {
+      config.headers['accesstoken'] = getAccessToken()
+      config.headers['refreshtoken'] = getRefreshToken()
+    }
+
     return config
   },
   error => {
@@ -38,7 +45,7 @@ service.interceptors.response.use(
   /**
    * If you want to get http information such as headers or status
    * Please return  response => response
-  */
+   */
 
   /**
    * Determine the request status by custom code

@@ -1,7 +1,7 @@
 // 系统默认配置
 module.exports = {
   // 页面标题
-  title: 'Fall PLatform',
+  title: 'FALL PLATFORM',
 
   /**
    * @type {boolean} true | false

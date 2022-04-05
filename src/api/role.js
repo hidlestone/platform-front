@@ -7,10 +7,14 @@ export function getRoutes() {
   })
 }
 
-export function getRoles() {
+// 分页查询所有角色
+export function getRoles(data) {
+  data.pafeNum = 1
+  data.pafeSize = 10
   return request({
-    url: '/vue-element-admin/roles',
-    method: 'get'
+    url: '/role/list',
+    method: 'post',
+    data
   })
 }
 

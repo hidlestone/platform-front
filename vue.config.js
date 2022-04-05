@@ -1,13 +1,20 @@
+// 严格模式，ES5后，严格模式下你不能使用未声明的变量。
 'use strict'
+// 导入path路径模块
 const path = require('path')
 // 导入默认配置
 const defaultSettings = require('./src/settings.js')
 
+// path.resolve 是基于命令行所在路径为地址
+// __dirname 变量 是以文件所处的路径为值
+// console.log(path.resolve('hello'))           根目录：root/hello
+// console.log(path.join(__dirname, 'hello'))   src目录：root/src/hello
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'vue Element Admin' // page title
+// 页面tab标题
+const name = defaultSettings.title || 'FALL PLATFORM' // page title
 
 // 前端访问端口
 // If your port is set to 80,
@@ -26,15 +33,15 @@ module.exports = {
    * In most cases please use '/' !!!
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
-  publicPath: '/',
-  outputDir: 'dist',
-  assetsDir: 'static',
-  lintOnSave: process.env.NODE_ENV === 'development',
-  productionSourceMap: false,
-  devServer: {
-    port: port,
-    open: true,
-    overlay: {
+  publicPath: '/',                // 基本路径
+  outputDir: 'dist',              // 构建时的输出目录
+  assetsDir: 'static',            // 放置静态资源的目录
+  lintOnSave: process.env.NODE_ENV === 'development',   // eslint-loader 是否在保存的时候检查
+  productionSourceMap: false,     // 生产环境是否生成 sourceMap 文件
+  devServer: {                    // 配置 webpack-dev-server 行为。
+    port: port,                   // 端口
+    open: false,                  // 编译后默认打开浏览器
+    overlay: {                    // 显示警告和错误
       warnings: false,
       errors: true
     },
@@ -50,6 +57,7 @@ module.exports = {
       }
     }
   },
+  // webpack 链接 API，用于生成和修改 webapck 配置。https://github.com/mozilla-neutrino/webpack-chain
   chainWebpack(config) {
     // it can improve the speed of the first screen, it is recommended to turn on preload
     // it can improve the speed of the first screen, it is recommended to turn on preload
@@ -90,34 +98,35 @@ module.exports = {
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
             .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
+              // `runtime` must same as runtimeChunk name. default is `runtime`
               inline: /runtime\..*\.js$/
             }])
             .end()
           config
+            // 因为是多页面，所以取消 chunks，每个页面只对应一个单独的 JS / CSS
             .optimization.splitChunks({
-              chunks: 'all',
-              cacheGroups: {
-                libs: {
-                  name: 'chunk-libs',
-                  test: /[\\/]node_modules[\\/]/,
-                  priority: 10,
-                  chunks: 'initial' // only package third parties that are initially dependent
-                },
-                elementUI: {
-                  name: 'chunk-elementUI', // split elementUI into a single package
-                  priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
-                  test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
-                },
-                commons: {
-                  name: 'chunk-commons',
-                  test: resolve('src/components'), // can customize your rules
-                  minChunks: 3, //  minimum common number
-                  priority: 5,
-                  reuseExistingChunk: true
-                }
+            chunks: 'all',
+            cacheGroups: {
+              libs: {
+                name: 'chunk-libs',
+                test: /[\\/]node_modules[\\/]/,
+                priority: 10,
+                chunks: 'initial' // only package third parties that are initially dependent
+              },
+              elementUI: {
+                name: 'chunk-elementUI', // split elementUI into a single package
+                priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
+                test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
+              },
+              commons: {
+                name: 'chunk-commons',
+                test: resolve('src/components'), // can customize your rules
+                minChunks: 3, //  minimum common number
+                priority: 5,
+                reuseExistingChunk: true
               }
-            })
+            }
+          })
           // https:// webpack.js.org/configuration/optimization/#optimizationruntimechunk
           config.optimization.runtimeChunk('single')
         }
