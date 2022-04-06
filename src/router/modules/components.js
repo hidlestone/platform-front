@@ -2,6 +2,7 @@
 
 import Layout from '@/layout'
 
+// 组件路由
 const componentsRouter = {
   path: '/components',
   component: Layout,

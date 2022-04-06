@@ -134,9 +134,9 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/permission/page',
     alwaysShow: true, // will always show the root menu
-    name: 'Permission',
+    name: 'Permission测试',
     meta: {
-      title: 'Permission',
+      title: 'Permission测试',
       icon: 'lock',
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
@@ -163,9 +163,9 @@ export const asyncRoutes = [
         path: 'role',
         // component: () => import('@/views/permission/role'),
         component: () => import('@/views/systemmanagement/role'),
-        name: 'RolePermission',
+        name: 'RolePermission测试',
         meta: {
-          title: 'Role Permission',
+          title: 'Role Permission测试',
           roles: ['admin']
         }
       }

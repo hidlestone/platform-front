@@ -161,7 +161,6 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
-              console.log('handleLogin')
               // 登录成功之后重定向到首页
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               this.loading = false

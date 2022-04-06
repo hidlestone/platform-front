@@ -1,5 +1,6 @@
 import { asyncRoutes, constantRoutes } from '@/router'
 import { getAllMenus } from '@/api/permission'
+import Layout from '@/layout'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -47,6 +48,7 @@ const mutations = {
   }
 }
 
+const _import = require('@/router/_import_' + process.env.NODE_ENV)// 获取组件的方法
 const actions = {
   // 根据角色获取路由
   generateRoutes({ commit }, roles) {
@@ -60,25 +62,26 @@ const actions = {
           const children = []
           const childrenTmp = data[i].children
           for (let i = 0, len = childrenTmp.length; i < len; i++) {
-            let route = {
+            const route = {
               path: childrenTmp[i].path,
               // component: () => import('@/views/systemmanagement/role'),
-              component: () => import(`@/views/${childrenTmp[i].component}`),
+              // component: () => import(`@/views/${childrenTmp[i].component}`),
               // component: resolve => require([`@/views/${childrenTmp[i].component}`], resolve),
+              component: _import(childrenTmp[i].component),
+              // component: () => import('@/views/permission/page'),
               redirect: childrenTmp[i].redirect,
-              /*alwaysShow: childrenTmp[i].alwaysShow,*/
               name: childrenTmp[i].name,
               meta: {
                 title: childrenTmp[i].meta.title,
-                /*icon: childrenTmp[i].meta.icon,*/
-                roles: []
+                /*  icon: childrenTmp[i].meta.icon,*/
+                roles: ['admin']
               }
             }
-            children.push(routeSub)
+            children.push(route)
           }
-          let route = {
+          const route = {
             path: data[i].path,
-            component: data[i].component,
+            component: Layout,
             redirect: data[i].redirect,
             alwaysShow: data[i].alwaysShow,
             name: data[i].name,
@@ -86,7 +89,7 @@ const actions = {
             meta: {
               title: data[i].meta.title,
               icon: data[i].meta.icon,
-              roles: null
+              roles: ['admin']
             }
           }
           routeArr.push(route)
@@ -97,7 +100,9 @@ const actions = {
         } else {
           accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
         }
+        /*  routeArr = filterAsyncRouter(routeArr)*/
         const allRoute = routeArr.concat(accessedRoutes)
+
         commit('SET_ROUTES', allRoute)
         resolve(allRoute)
       }).catch(error => {
@@ -106,6 +111,23 @@ const actions = {
     })
   }
 }
+
+/*  function filterAsyncRouter(asyncRouterMap) { // 遍历后台传来的路由字符串，转换为组件对象
+  const accessedRouters = asyncRouterMap.filter(route => {
+    if (route.component) {
+      if (route.component === 'Layout') {
+        route.component = Layout
+      } else {
+        route.component = _import(route.component)
+      }
+    }
+    if (route.children && route.children.length) {
+      route.children = filterAsyncRouter(route.children)
+    }
+    return true
+  })
+  return accessedRouters
+}*/
 
 export default {
   namespaced: true,

@@ -27,6 +27,7 @@ import variables from '@/styles/variables.scss'
 export default {
   components: { SidebarItem, Logo },
   computed: {
+    // 拿到Getters中的数据
     ...mapGetters([
       'permission_routes',
       'sidebar'
