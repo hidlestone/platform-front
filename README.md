@@ -1,3 +1,5 @@
+# platform-front
+
 ## 一、项目结构
 ```
 ├── build                   // 对 webpack 开发和打包的相关设置，包括入口文件、输出文件、使用的模块等；
@@ -115,6 +117,28 @@
     │── App.vue             // 入口页面
     │── main.js             // 入口，加载组件，初始化等
     │── permission.js       // 权限管理
+```
+配置文件
+```
+.editorconfig           EditorConfig配置，控制代码样式等。https://www.jianshu.com/p/104766ccfa8b
+.env.development        开发环境配置。https://blog.csdn.net/weixin_35773751/article/details/106069911
+.env.production         生产环境配置。
+.env.staging            测试环境配置。
+.eslintignore           ESLint检测忽略的文件。https://www.cnblogs.com/kunmomo/p/14987319.html
+.eslintrc.js            ESLint代码风格规范。https://www.jianshu.com/p/ad6784d028aa
+.gitignore              git忽略的文件。
+.travis.yml             travis配置文件。https://www.liaoxuefeng.com/article/1083103562955136
+babel.config.js         babel配置文件。https://blog.csdn.net/weixin_42472040/article/details/112173176
+jest.config.js          Jest配置文件。https://mubiaozhan.cn/web/content/264
+jsconfig.json           指定了JavaScript 语言服务提供的功能的根文件和选项。
+LICENSE                 证书。https://mubiaozhan.cn/web/content/266
+package.json            定义了这个项目所需要的各种模块，以及项目的配置信息（比如名称、版本、许可证等元数据）。http://javascript.ruanyifeng.com/nodejs/packagejson.html
+package-lock.json       锁定安装时的包的版本号，并且需要上传到git，以保证其他人在npm install时大家的依赖能保证一致。https://www.cnblogs.com/cangqinglang/p/8336754.html
+plopfile.js             基于 Plop 创建 Vue component、store、view文件模板。https://mubiaozhan.cn/web/content/269
+postcss.config.js       PostCSS是一款使用插件去转换CSS的工具，有许多非常好用的插件，例如autoprefixer,cssnext以及CSS Modules。https://segmentfault.com/a/1190000014782560
+vue.config.js           配置文件，需自行配置。在@vue/cli-service 启动的时候会自动加载。
+                        https://segmentfault.com/a/1190000016101954
+                        https://blog.51cto.com/u_15302032/3066777
 ```
 
 ## 二、目录
