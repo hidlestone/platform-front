@@ -11,16 +11,13 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 // 访问URL白名单
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
-// 【在每次请求之前】
 // 全局钩子router.beforeEach
 router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
   // set page title
   document.title = getPageTitle(to.meta.title)
-  // 当前是否已经登录，即存在token
-  // determine whether the user has logged in
-  // const hasToken = getToken()
+  // 当前是否已经登录，即是否存在token
   const hasToken = getAccessToken() && getRefreshToken()
   if (hasToken) {
     if (to.path === '/login') {
@@ -29,7 +26,6 @@ router.beforeEach(async(to, from, next) => {
       NProgress.done() // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
     } else {
       // determine whether the user has obtained his permission roles through getInfo
-      console.log(store.getters.roles)
       const hasRoles = store.getters.roles && store.getters.roles.length > 0
       // 当前store中是否存在角色信息
       if (hasRoles) {
@@ -62,13 +58,11 @@ router.beforeEach(async(to, from, next) => {
       }
     }
   } else {
-    /* has no token*/
     // 不存在token，则判断是否在白名单内，不存在则重定向到登录页
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()
     } else {
-      // other pages that do not have permission to access are redirected to the login page.
       next(`/login?redirect=${to.path}`)
       NProgress.done()
     }
