@@ -7,36 +7,46 @@ export function getRoutes() {
   })
 }
 
+// 获取菜单树
+export function getMenuTree() {
+  return request({
+    url: '/menu/getmenutree',
+    method: 'get'
+  })
+}
+
 // 分页查询所有角色
 export function getRoles(data) {
-  data.pafeNum = 1
-  data.pafeSize = 10
   return request({
-    url: '/role/list',
+    url: '/role/getallrole',
     method: 'post',
     data
   })
 }
 
+// 添加角色
 export function addRole(data) {
   return request({
-    url: '/vue-element-admin/role',
+    url: '/role/save',
     method: 'post',
     data
   })
 }
 
-export function updateRole(id, data) {
+// 更新角色
+export function updateRole(data) {
   return request({
-    url: `/vue-element-admin/role/${id}`,
-    method: 'put',
+    url: '/role/update',
+    method: 'post',
     data
   })
 }
 
+// 删除角色
 export function deleteRole(id) {
   return request({
-    url: `/vue-element-admin/role/${id}`,
-    method: 'delete'
+    url: '/role/delete',
+    method: 'post',
+    params: { id }
   })
 }

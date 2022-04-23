@@ -2,6 +2,7 @@ import axios from 'axios'
 import { Message, MessageBox } from 'element-ui'
 import store from '@/store'
 import { getAccessToken, getRefreshToken, getToken } from '@/utils/auth'
+import JsonBig from 'json-bigint'
 
 // create an axios instance
 const service = axios.create({
@@ -9,7 +10,14 @@ const service = axios.create({
   baseURL: 'http://127.0.0.1:7070/payn', // url = base url + request url
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 10000 // request timeout 超时时间：10S
+  timeout: 10000, // request timeout 超时时间：10S
+  // transformResponse 允许自定义原始的响应数据（字符串）。兼容雪花ID。
+  transformResponse: [data => {
+    const json = JsonBig({
+      storeAsString: true
+    })
+    return json.parse(data)
+  }]
 })
 
 // 请求拦截器
