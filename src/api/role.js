@@ -8,10 +8,11 @@ export function getRoutes() {
 }
 
 // 获取菜单树
-export function getMenuTree() {
+export function getMenuTree(data) {
   return request({
     url: '/menu/getmenutree',
-    method: 'get'
+    method: 'post',
+    data: data || {}
   })
 }
 

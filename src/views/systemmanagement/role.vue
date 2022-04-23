@@ -168,12 +168,12 @@ export default {
       }
       return res
     },
-    generateArr(routes) {
+    generateArr(menus) {
       let data = []
-      routes.forEach(route => {
-        data.push(route)
-        if (route.children) {
-          const temp = this.generateArr(route.children)
+      menus.forEach(menu => {
+        data.push(menu)
+        if (menu.children) {
+          const temp = this.generateArr(menu.children)
           if (temp.length > 0) {
             data = [...data, ...temp]
           }
@@ -181,6 +181,7 @@ export default {
       })
       return data
     },
+    // 新增角色页
     handleAddRole() {
       this.role = Object.assign({}, defaultRole)
       if (this.$refs.tree) {
@@ -189,17 +190,30 @@ export default {
       this.dialogType = 'new'
       this.dialogVisible = true
     },
-    handleEdit(scope) {
+    // 编辑角色信息
+    async handleEdit(scope) {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
       this.role = deepClone(scope.row)
-      this.$nextTick(() => {
-        const routes = this.generateRoutes(this.role.routes)
-        this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        // set checked state of a node not affects its father and child nodes
-        this.checkStrictly = false
-      })
+      // 根据角色id查询菜单树
+      var param = {
+        'roleIds': [this.role.id]
+      }
+      const { success, data } = await getMenuTree(param)
+      if (success) {
+        for (let index = 0; index < this.rolesList.length; index++) {
+          if (this.rolesList[index].roleCode === this.role.roleCode) {
+            this.rolesList.splice(index, 1, Object.assign({}, this.role))
+          }
+        }
+        this.$nextTick(() => {
+          // const menus = this.generateRoutes(this.role.menus)
+          this.$refs.tree.setCheckedNodes(this.generateArr(data))
+          // set checked state of a node not affects its father and child nodes
+          this.checkStrictly = false
+        })
+      }
     },
     handleDelete({ $index, row }) {
       this.$confirm('Confirm to remove the role?', 'Warning', {
@@ -208,12 +222,14 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          await deleteRole(row.id)
-          this.rolesList.splice($index, 1)
-          this.$message({
-            type: 'success',
-            message: 'Delete succed!'
-          })
+          const { success } = await deleteRole(row.id)
+          if (success) {
+            this.rolesList.splice($index, 1)
+            this.$message({
+              type: 'success',
+              message: 'Delete succed!'
+            })
+          }
         })
         .catch(err => {
           console.error(err)
@@ -260,20 +276,25 @@ export default {
       // 编辑
       if (isEdit) {
         // 更新角色信息
-        await updateRole(this.role)
-        for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].roleCode === this.role.roleCode) {
-            this.rolesList.splice(index, 1, Object.assign({}, this.role))
-            break
+        const { success } = await updateRole(this.role)
+        if (success) {
+          for (let index = 0; index < this.rolesList.length; index++) {
+            if (this.rolesList[index].roleCode === this.role.roleCode) {
+              this.rolesList.splice(index, 1, Object.assign({}, this.role))
+              break
+            }
           }
         }
       } else {
         // 新增角色
-        const { data } = await addRole(this.role)
-        this.role.roleCode = data.roleCode
-        this.role.roleName = data.roleName
-        this.role.roleDesc = data.roleDesc
-        this.rolesList.push(this.role)
+        const { success, data } = await addRole(this.role)
+        if (success) {
+          this.role.id = data.id
+          this.role.roleCode = data.roleCode
+          this.role.roleName = data.roleName
+          this.role.roleDesc = data.roleDesc
+          this.rolesList.push(this.role)
+        }
       }
       // 通知提示
       const { roleDesc, roleCode, roleName } = this.role
