@@ -202,11 +202,6 @@ export default {
       }
       const { success, data } = await getMenuTree(param)
       if (success) {
-        for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].roleCode === this.role.roleCode) {
-            this.rolesList.splice(index, 1, Object.assign({}, this.role))
-          }
-        }
         this.$nextTick(() => {
           // const menus = this.generateRoutes(this.role.menus)
           this.$refs.tree.setCheckedNodes(this.generateArr(data))
@@ -256,7 +251,6 @@ export default {
       const isEdit = this.dialogType === 'edit'
       // 获取菜单选中项
       const checkedNodes = this.$refs.tree.getCheckedNodes()
-      console.log(checkedNodes)
       if (!checkedNodes || checkedNodes.length < 1) {
         this.$message.error('请选择菜单')
         return false
@@ -271,8 +265,6 @@ export default {
         menuReqList.push(menu)
       }
       this.role.menuReqList = menuReqList
-      console.log(this.role)
-      console.log(menuReqList)
       // 编辑
       if (isEdit) {
         // 更新角色信息
