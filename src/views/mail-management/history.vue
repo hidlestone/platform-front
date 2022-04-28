@@ -29,6 +29,46 @@
           {{ scope.row.receiveUserName }}
         </template>
       </el-table-column>
+      <el-table-column align="header-center" label="接收邮箱">
+        <template slot-scope="scope">
+          {{ scope.row.receiveMail }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="抄送者">
+        <template slot-scope="scope">
+          {{ scope.row.cc }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="密送者">
+        <template slot-scope="scope">
+          {{ scope.row.bcc }}
+        </template>
+      </el-table-column>
+      <!--      <el-table-column align="header-center" label="内容">-->
+      <!--        <template slot-scope="scope">-->
+      <!--          {{ scope.row.content }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
+      <el-table-column align="header-center" label="文件组ID">
+        <template slot-scope="scope">
+          {{ scope.row.fileGroupId }}
+        </template>
+      </el-table-column>
+      <!--      <el-table-column align="header-center" label="失败原因">-->
+      <!--        <template slot-scope="scope">-->
+      <!--          {{ scope.row.msg }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
+      <el-table-column align="header-center" label="最后一次发送时间">
+        <template slot-scope="scope">
+          {{ scope.row.lastSendTime }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="是否成功">
+        <template slot-scope="scope">
+          {{ scope.row.sendFlag }}
+        </template>
+      </el-table-column>
       <!--      <el-table-column align="center" label="操作">-->
       <!--        <template slot-scope="scope">-->
       <!--          <el-button type="primary" size="small" @click="handleEdit(scope)">Edit</el-button>-->

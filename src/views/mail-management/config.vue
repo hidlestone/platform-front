@@ -60,28 +60,46 @@
     />
 
     <!-- 对话框 -->
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'Edit Role':'New Role'">
-      <el-form :model="config" label-width="80px" label-position="left">
-        <el-form-item label="主机名称">
-          <el-input v-model="config.host" placeholder="主机名" />
-        </el-form-item>
-        <el-form-item label="端口">
-          <el-input v-model="config.port" placeholder="端口" />
-        </el-form-item>
-        <el-form-item label="账号">
-          <el-input v-model="config.username" placeholder="端口" />
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="config.password" placeholder="端口" />
-        </el-form-item>
-        <el-form-item label="协议">
-          <el-input v-model="config.protocol" placeholder="协议" />
-        </el-form-item>
-        <el-form-item label="编码">
-          <el-input v-model="config.defaultEncoding" placeholder="编码" />
-        </el-form-item>
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'新增'" width="550px">
+      <el-form ref="config" :model="config" :rules="rules" label-width="80px" label-position="right">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="主机名称" prop="host">
+              <el-input v-model="config.host" placeholder="主机名" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="端口" prop="port">
+              <el-input v-model="config.port" placeholder="端口" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="账号" prop="username">
+              <el-input v-model="config.username" placeholder="账号" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="密码" prop="password">
+              <el-input v-model="config.password" placeholder="密码" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="协议">
+              <el-input v-model="config.protocol" placeholder="协议" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="编码">
+              <el-input v-model="config.defaultEncoding" placeholder="编码" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="其他配置（JSON）">
-          <el-input v-model="config.properties" placeholder="其他配置" />
+          <el-input v-model="config.properties" type="textarea" :rows="5" placeholder="其他配置" />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
@@ -99,6 +117,7 @@ import { deleteConfig, updateConfig, addConfig, list } from '@/api/mail/config'
 
 // 默认角色初始化数据
 const defaultConfig = {
+  id: '',
   host: '',
   port: '',
   username: '',
@@ -127,6 +146,21 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'menuName'
+      },
+      rules: {
+        host: [
+          { required: true, message: '主机名不能为空', trigger: 'blur' }
+        ],
+        port: [
+          { required: true, message: '端口不能为空', trigger: 'blur' }
+        ],
+        username: [
+          { required: true, message: '用户名不能为空', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' }
+          // { min: 6, max: 30, message: '密码6-30位', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -221,33 +255,31 @@ export default {
           console.error(err)
         })
     },
-    confirmConfig() {
+    async confirmConfig() {
+      let validFlag = true
+      await this.$refs['config'].validate(valid => {
+        // 验证通过为true，有一个不通过就是false
+        if (!valid) {
+          validFlag = false
+        }
+      })
+      if (!validFlag) {
+        return
+      }
       const isEdit = this.dialogType === 'edit'
       // 编辑
       if (isEdit) {
-        const { success } = updateConfig(this.config)
-        if (success) {
-          for (let index = 0; index < this.configList.length; index++) {
-            if (this.configList[index].id === this.config.id) {
-              this.configList.splice(index, 1, Object.assign({}, this.role))
-              break
-            }
+        await updateConfig(this.config)
+        for (let index = 0; index < this.configList.length; index++) {
+          if (this.configList[index].id === this.config.id) {
+            this.configList.splice(index, 1, Object.assign({}, this.config))
+            break
           }
         }
       } else {
         // 新增
-        const { success, data } = addConfig(this.config)
-        if (success) {
-          this.config.id = data.id
-          this.config.host = data.host
-          this.config.port = data.port
-          this.config.username = data.username
-          this.config.password = data.password
-          this.config.protocol = data.protocol
-          this.config.defaultEncoding = data.defaultEncoding
-          this.config.properties = data.properties
-          this.configList.push(this.config)
-        }
+        await addConfig(this.config)
+        await this.list()
       }
       // 通知提示
       // const { roleDesc, roleCode, roleName } = this.role

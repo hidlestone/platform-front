@@ -1,26 +1,52 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="handleAddRole">New Config</el-button>
+    <div>
+      <!-- 搜索 -->
+      <el-input v-model="searchParam.title" placeholder="请输入title" style="width: 200px" />
+      <el-button type="primary" style="margin-left: 10px" @click="list">查询</el-button>
+      <el-button type="primary" style="margin-left: 10px" @click="clearAndSearch">清空</el-button>
+      <span class="newButton"><el-button type="primary" @click="handleAddTemplate">新建</el-button></span>
+    </div>
     <!-- 表格 -->
-    <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
+    <el-table :data="templateList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="ID" width="220">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="角色编码" width="220">
+      <el-table-column align="center" label="模板配置编码" width="220">
         <template slot-scope="scope">
-          {{ scope.row.roleCode }}
+          {{ scope.row.code }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="名称" width="220">
+      <el-table-column align="center" label="模板配置描述" width="220">
         <template slot-scope="scope">
-          {{ scope.row.roleName }}
+          {{ scope.row.desc }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="描述">
+      <el-table-column align="header-center" label="标题">
         <template slot-scope="scope">
-          {{ scope.row.roleDesc }}
+          {{ scope.row.title }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="发送者">
+        <template slot-scope="scope">
+          {{ scope.row.from }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="内容">
+        <template slot-scope="scope">
+          {{ scope.row.content }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="文件组ID">
+        <template slot-scope="scope">
+          {{ scope.row.fileGroupId }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="重试次数">
+        <template slot-scope="scope">
+          {{ scope.row.retryCount }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
@@ -30,43 +56,58 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="page.total"
+      :current-page="page.current"
+      @current-change="pageChange"
+    />
 
     <!-- 对话框 -->
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'Edit Role':'New Role'">
-      <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="ID">
-          <el-input v-model="role.id" placeholder="Role ID" />
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'新增'" width="550px">
+      <el-form ref="template" :model="template" label-width="80px" :rules="rules" label-position="right">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="模板编码" prop="code">
+              <el-input v-model="template.code" placeholder="模板配置编码" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="标题" prop="title">
+              <el-input v-model="template.title" placeholder="标题" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="发送者" prop="from">
+              <el-input v-model="template.from" placeholder="发送者" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="文件组ID">
+              <el-input v-model="template.fileGroupId" placeholder="文件组ID" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="重试次数">
+              <el-input v-model="template.retryCount" placeholder="重试次数" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="模板描述">
+          <el-input v-model="template.desc" type="textarea" :rows="5" placeholder="模板配置描述" />
         </el-form-item>
-        <el-form-item label="Code">
-          <el-input v-model="role.roleCode" placeholder="Role Code" :disabled="dialogType==='edit'? true:false" />
-        </el-form-item>
-        <el-form-item label="Name">
-          <el-input v-model="role.roleName" placeholder="Role Name" />
-        </el-form-item>
-        <el-form-item label="Desc">
-          <el-input
-            v-model="role.roleDesc"
-            :autosize="{ minRows: 2, maxRows: 4}"
-            type="textarea"
-            placeholder="Role Description"
-          />
-        </el-form-item>
-        <!-- 菜单树 -->
-        <el-form-item label="Menus">
-          <el-tree
-            ref="tree"
-            :check-strictly="checkStrictly"
-            :data="menusData"
-            :props="defaultProps"
-            show-checkbox
-            node-key="path"
-            class="permission-tree"
-          />
+        <el-form-item label="内容" prop="content">
+          <el-input v-model="template.content" type="textarea" :rows="5" placeholder="内容" />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
-        <el-button type="danger" @click="dialogVisible=false">Cancel</el-button>
-        <el-button type="primary" @click="confirmRole">Confirm</el-button>
+        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
+        <el-button type="primary" @click="confirmTemplate">确认</el-button>
       </div>
     </el-dialog>
 
@@ -74,16 +115,19 @@
 </template>
 
 <script>
-import path from 'path'
 import { deepClone } from '@/utils'
-import { addRole, deleteRole, getMenuTree, getRoles, updateRole } from '@/api/role'
+import { deleteTemplate, updateTemplate, addTemplate, list } from '@/api/mail/template'
 
 // 默认角色初始化数据
-const defaultRole = {
-  key: '',
-  name: '',
-  description: '',
-  menus: []
+const defaultTemplate = {
+  id: '',
+  code: '',
+  desc: '',
+  title: '',
+  from: '',
+  content: '',
+  fileGroupId: 0,
+  retryCount: 0
 }
 
 export default {
@@ -92,9 +136,12 @@ export default {
   // 为方便起见，该对象的任何顶级 property 也会直接通过组件实例暴露出来：
   data() {
     return {
-      role: Object.assign({}, defaultRole),
+      searchParam: { pageNum: 1, pageSize: 10 },
+      template: Object.assign({}, defaultTemplate),
       menus: [],
-      rolesList: [],
+      page: {},
+      templateList: [],
+      // rolesList: [],
       dialogVisible: false,
       dialogType: 'new',
       checkStrictly: false,
@@ -102,6 +149,20 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'menuName'
+      },
+      rules: {
+        code: [
+          { required: true, message: '模板编码不能为空', trigger: 'blur' }
+        ],
+        title: [
+          { required: true, message: '标题不能为空', trigger: 'blur' }
+        ],
+        from: [
+          { required: true, message: '发送者不能为空', trigger: 'blur' }
+        ],
+        content: [
+          { required: true, message: '内容不能为空', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -114,101 +175,46 @@ export default {
     // routesData 时计算属性会立即返回之前的计算结果，而不必再次执行函数。
     // 这也同样意味着下面的计算属性将永远不会更新，因为 Date.now () 不是响应式依赖：
     // 计算属性的 getter
-    menusData() {
-      // `this` 指向 vm 实例
-      return this.menus
-    }
+    // menusData() {
+    //   // `this` 指向 vm 实例
+    //   return this.menus
+    // }
   },
   created() {
     // Mock: get all routes and roles list from server
     // this.getRoutes()
-    this.getMenuTree()
-    this.getRoles()
+    // this.getMenuTree()
+    // this.getRoles()
+    this.list()
   },
   // 用 methods 选项向组件实例添加方法，它应该是一个包含所需方法的对象：
   methods: {
-    async getMenuTree() {
-      const res = await getMenuTree()
-      this.menus = res.data
-      // this.serviceRoutes = res.data
-      // this.routes = this.generateRoutes(res.data)
+
+    async list() {
+      const res = await list(this.searchParam)
+      this.templateList = res.data.records
+      this.page = res.data
     },
-    async getRoles() {
-      const res = await getRoles()
-      this.rolesList = res.data
-    },
-
-    // Reshape the routes structure so that it looks the same as the sidebar
-    generateRoutes(routes, basePath = '/') {
-      const res = []
-
-      for (let route of routes) {
-        // skip some route
-        if (route.hidden) {
-          continue
-        }
-
-        const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
-
-        if (route.children && onlyOneShowingChild && !route.alwaysShow) {
-          route = onlyOneShowingChild
-        }
-
-        const data = {
-          path: path.resolve(basePath, route.path),
-          title: route.meta && route.meta.title
-
-        }
-
-        // recursive child routes
-        if (route.children) {
-          data.children = this.generateRoutes(route.children, data.path)
-        }
-        res.push(data)
-      }
-      return res
-    },
-    generateArr(menus) {
-      let data = []
-      menus.forEach(menu => {
-        data.push(menu)
-        if (menu.children) {
-          const temp = this.generateArr(menu.children)
-          if (temp.length > 0) {
-            data = [...data, ...temp]
-          }
-        }
-      })
-      return data
-    },
-    // 新增角色页
-    handleAddRole() {
-      this.role = Object.assign({}, defaultRole)
-      if (this.$refs.tree) {
-        this.$refs.tree.setCheckedNodes([])
-      }
+    handleAddTemplate() {
+      this.template = Object.assign({}, defaultTemplate)
       this.dialogType = 'new'
       this.dialogVisible = true
+    },
+    pageChange(currentPage) {
+      // debugger
+      this.searchParam.pageNum = currentPage
+      this.list(this.searchParam)
+    },
+    clearAndSearch() {
+      this.searchParam.title = ''
+      this.pageChange(1)
     },
     // 编辑角色信息
     async handleEdit(scope) {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
-      this.role = deepClone(scope.row)
-      // 根据角色id查询菜单树
-      var param = {
-        'roleIds': [this.role.id]
-      }
-      const { success, data } = await getMenuTree(param)
-      if (success) {
-        this.$nextTick(() => {
-          // const menus = this.generateRoutes(this.role.menus)
-          this.$refs.tree.setCheckedNodes(this.generateArr(data))
-          // set checked state of a node not affects its father and child nodes
-          this.checkStrictly = false
-        })
-      }
+      this.template = deepClone(scope.row)
     },
     handleDelete({ $index, row }) {
       this.$confirm('Confirm to remove the role?', 'Warning', {
@@ -217,9 +223,9 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          const { success } = await deleteRole(row.id)
+          const { success } = await deleteTemplate(row.id)
           if (success) {
-            this.rolesList.splice($index, 1)
+            this.templateList.splice($index, 1)
             this.$message({
               type: 'success',
               message: 'Delete succed!'
@@ -230,97 +236,55 @@ export default {
           console.error(err)
         })
     },
-    generateTree(routes, basePath = '/', checkedKeys) {
-      const res = []
-
-      for (const route of routes) {
-        const routePath = path.resolve(basePath, route.path)
-
-        // recursive child routes
-        if (route.children) {
-          route.children = this.generateTree(route.children, routePath, checkedKeys)
-        }
-
-        if (checkedKeys.includes(routePath) || (route.children && route.children.length >= 1)) {
-          res.push(route)
-        }
-      }
-      return res
-    },
-    async confirmRole() {
+    async confirmTemplate() {
       const isEdit = this.dialogType === 'edit'
-      // 获取菜单选中项
-      const checkedNodes = this.$refs.tree.getCheckedNodes()
-      if (!checkedNodes || checkedNodes.length < 1) {
-        this.$message.error('请选择菜单')
-        return false
-      }
-      // const checkedKeys = this.$refs.tree.getCheckedKeys()
-      // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
-      var menuReqList = []
-      for (var i = 0, len = checkedNodes.length; i < len; i++) {
-        var menu = {
-          'id': checkedNodes[i].id
+      let validFlag = true
+      await this.$refs['template'].validate(valid => {
+        // 验证通过为true，有一个不通过就是false
+        if (!valid) {
+          validFlag = false
         }
-        menuReqList.push(menu)
+      })
+      // 校验不通过直接返回
+      if (!validFlag) {
+        return
       }
-      this.role.menuReqList = menuReqList
       // 编辑
       if (isEdit) {
-        // 更新角色信息
-        const { success } = await updateRole(this.role)
-        if (success) {
-          for (let index = 0; index < this.rolesList.length; index++) {
-            if (this.rolesList[index].roleCode === this.role.roleCode) {
-              this.rolesList.splice(index, 1, Object.assign({}, this.role))
-              break
-            }
+        await updateTemplate(this.template)
+        for (let index = 0; index < this.templateList.length; index++) {
+          if (this.templateList[index].id === this.template.id) {
+            this.templateList.splice(index, 1, Object.assign({}, this.template))
+            break
           }
         }
       } else {
-        // 新增角色
-        const { success, data } = await addRole(this.role)
-        if (success) {
-          this.role.id = data.id
-          this.role.roleCode = data.roleCode
-          this.role.roleName = data.roleName
-          this.role.roleDesc = data.roleDesc
-          this.rolesList.push(this.role)
-        }
+        // 新增
+        await addTemplate(this.template)
+        await this.list()
+        // this.template.id = data.id
+        // this.template.code = data.host
+        // this.template.desc = data.port
+        // this.template.title = data.username
+        // this.template.from = data.password
+        // this.template.content = data.protocol
+        // this.template.fileGroupId = data.defaultEncoding
+        // this.template.retryCount = data.properties
+        // this.templateList.push(this.template)
       }
       // 通知提示
-      const { roleDesc, roleCode, roleName } = this.role
+      // const { roleDesc, roleCode, roleName } = this.role
       this.dialogVisible = false
       this.$notify({
         title: 'Success',
         dangerouslyUseHTMLString: true,
-        message: `
-            <div>Role Code: ${roleCode}</div>
-            <div>Role Name: ${roleName}</div>
-            <div>Description: ${roleDesc}</div>
-          `,
+        // message: `
+        //     <div>Role Code: ${roleCode}</div>
+        //     <div>Role Name: ${roleName}</div>
+        //     <div>Description: ${roleDesc}</div>
+        //   `,
         type: 'success'
       })
-    },
-    // reference: src/view/layout/components/Sidebar/SidebarItem.vue
-    onlyOneShowingChild(children = [], parent) {
-      let onlyOneChild = null
-      const showingChildren = children.filter(item => !item.hidden)
-
-      // When there is only one child route, the child route is displayed by default
-      if (showingChildren.length === 1) {
-        onlyOneChild = showingChildren[0]
-        onlyOneChild.path = path.resolve(parent.path, onlyOneChild.path)
-        return onlyOneChild
-      }
-
-      // Show parent if there are no child route to display
-      if (showingChildren.length === 0) {
-        onlyOneChild = { ...parent, path: '', noShowingChildren: true }
-        return onlyOneChild
-      }
-
-      return false
     }
   }
 }
@@ -334,5 +298,8 @@ export default {
     .permission-tree {
       margin-bottom: 30px;
     }
+  }
+  .newButton {
+    float: right;
   }
 </style>
