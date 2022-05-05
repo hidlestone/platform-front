@@ -162,7 +162,7 @@ export const asyncRoutes = [
       {
         path: 'role',
         // component: () => import('@/views/permission/role'),
-        component: () => import('@/views/systemmanagement/role'),
+        component: () => import('@/views/system-manage/role'),
         name: 'RolePermission测试',
         meta: {
           title: 'Role Permission测试',

@@ -64,7 +64,7 @@ const actions = {
           for (let i = 0, len = childrenTmp.length; i < len; i++) {
             const route = {
               path: childrenTmp[i].path,
-              // component: () => import('@/views/systemmanagement/role'),
+              // component: () => import('@/views/system-manage/role'),
               // component: () => import(`@/views/${childrenTmp[i].component}`),
               // component: resolve => require([`@/views/${childrenTmp[i].component}`], resolve),
               component: _import(childrenTmp[i].component),

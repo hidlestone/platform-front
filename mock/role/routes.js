@@ -86,7 +86,7 @@ const asyncRoutes = [
     children: [
       {
         path: 'role',
-        component: 'views/systemmanagement/role',
+        component: 'views/system-manage/role',
         name: '角色管理',
         meta: {
           title: '角色管理',
