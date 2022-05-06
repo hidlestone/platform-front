@@ -2,46 +2,51 @@
   <div class="app-container">
     <div>
       <!-- 搜索 -->
-      <el-input v-model="searchParam.productType" placeholder="请输入短信产品类型" style="width: 200px" />
+      <el-input v-model="searchParam.title" placeholder="请输入title" style="width: 200px" />
       <el-button type="primary" style="margin-left: 10px" @click="list">查询</el-button>
       <el-button type="primary" style="margin-left: 10px" @click="clearAndSearch">清空</el-button>
-      <span class="newButton"><el-button type="primary" @click="handleAddConfig">新建</el-button></span>
+      <span class="newButton"><el-button type="primary" @click="handleAddTemplate">新建</el-button></span>
     </div>
     <!-- 表格 -->
-    <el-table :data="configList" style="width: 100%;margin-top:30px;" border>
+    <el-table :data="templateList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="ID" width="220">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="短信产品类型" width="220">
+      <el-table-column align="center" label="模板配置编码" width="220">
         <template slot-scope="scope">
-          {{ scope.row.productType }}
+          {{ scope.row.code }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="区域ID" width="220">
+      <el-table-column align="center" label="模板配置描述" width="220">
         <template slot-scope="scope">
-          {{ scope.row.regionId }}
+          {{ scope.row.desc }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="AccessKeyId">
+      <el-table-column align="header-center" label="标题">
         <template slot-scope="scope">
-          {{ scope.row.accessKeyId }}
+          {{ scope.row.title }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="AccessKeySecret">
+      <el-table-column align="header-center" label="发送者">
         <template slot-scope="scope">
-          {{ scope.row.accessKeySecret }}
+          {{ scope.row.from }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="创建时间">
+      <el-table-column align="header-center" label="内容">
         <template slot-scope="scope">
-          {{ scope.row.gmtCreate }}
+          {{ scope.row.content }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="修改时间">
+      <el-table-column align="header-center" label="文件组ID">
         <template slot-scope="scope">
-          {{ scope.row.gmtModified }}
+          {{ scope.row.fileGroupId }}
+        </template>
+      </el-table-column>
+      <el-table-column align="header-center" label="重试次数">
+        <template slot-scope="scope">
+          {{ scope.row.retryCount }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
@@ -61,38 +66,48 @@
 
     <!-- 对话框 -->
     <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'新增'" width="550px">
-      <el-form ref="config" :model="config" :rules="rules" label-width="80px" label-position="right">
+      <el-form ref="template" :model="template" label-width="80px" :rules="rules" label-position="right">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="短信产品类型" prop="productType">
-              <el-input v-model="config.productType" placeholder="短信产品类型" />
+            <el-form-item label="模板编码" prop="code">
+              <el-input v-model="template.code" placeholder="模板配置编码" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="区域ID" prop="regionId">
-              <el-input v-model="config.regionId" placeholder="区域ID" />
+            <el-form-item label="标题" prop="title">
+              <el-input v-model="template.title" placeholder="标题" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="accessKeyId" prop="accessKeyId">
-              <el-input v-model="config.accessKeyId" placeholder="accessKeyId" />
+            <el-form-item label="发送者" prop="from">
+              <el-input v-model="template.from" placeholder="发送者" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="accessKeySecret" prop="accessKeySecret">
-              <el-input v-model="config.accessKeySecret" placeholder="accessKeySecret" />
+            <el-form-item label="文件组ID">
+              <el-input v-model="template.fileGroupId" placeholder="文件组ID" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="其他参数配置">
-          <el-input v-model="config.properties" type="textarea" :rows="5" placeholder="其他参数配置 JSON" />
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="重试次数">
+              <el-input v-model="template.retryCount" placeholder="重试次数" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="模板描述">
+          <el-input v-model="template.desc" type="textarea" :rows="5" placeholder="模板配置描述" />
+        </el-form-item>
+        <el-form-item label="内容" prop="content">
+          <el-input v-model="template.content" type="textarea" :rows="5" placeholder="内容" />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="confirmConfig">确认</el-button>
+        <el-button type="primary" @click="confirmTemplate">确认</el-button>
       </div>
     </el-dialog>
 
@@ -101,18 +116,18 @@
 
 <script>
 import { deepClone } from '@/utils'
-import { deleteConfig, updateConfig, addConfig, list } from '@/api/sms/config'
+import { deleteTemplate, updateTemplate, addTemplate, list } from '@/api/mail-manage/template'
 
 // 默认角色初始化数据
-const defaultConfig = {
+const defaultTemplate = {
   id: '',
-  productType: '',
-  regionId: '',
-  accessKeyId: '',
-  accessKeySecret: '',
-  properties: '',
-  gmtCreate: '',
-  gmtModified: ''
+  code: '',
+  desc: '',
+  title: '',
+  from: '',
+  content: '',
+  fileGroupId: 0,
+  retryCount: 0
 }
 
 export default {
@@ -121,27 +136,32 @@ export default {
   // 为方便起见，该对象的任何顶级 property 也会直接通过组件实例暴露出来：
   data() {
     return {
-      searchParam: { pageNum: 1, pageSize: 10, productType: '' },
-      config: Object.assign({}, defaultConfig),
+      searchParam: { pageNum: 1, pageSize: 10 },
+      template: Object.assign({}, defaultTemplate),
       menus: [],
       page: {},
-      configList: [],
+      templateList: [],
       // rolesList: [],
       dialogVisible: false,
       dialogType: 'new',
       checkStrictly: false,
+      // 菜单树中使用的字段
+      defaultProps: {
+        children: 'children',
+        label: 'menuName'
+      },
       rules: {
-        productType: [
-          { required: true, message: '短信产品类型不能为空', trigger: 'blur' }
+        code: [
+          { required: true, message: '模板编码不能为空', trigger: 'blur' }
         ],
-        regionId: [
-          { required: true, message: '区域ID不能为空', trigger: 'blur' }
+        title: [
+          { required: true, message: '标题不能为空', trigger: 'blur' }
         ],
-        accessKeyId: [
-          { required: true, message: 'accessKeyId不能为空', trigger: 'blur' }
+        from: [
+          { required: true, message: '发送者不能为空', trigger: 'blur' }
         ],
-        accessKeySecret: [
-          { required: true, message: 'accessKeySecret不能为空', trigger: 'blur' }
+        content: [
+          { required: true, message: '内容不能为空', trigger: 'blur' }
         ]
       }
     }
@@ -172,11 +192,11 @@ export default {
 
     async list() {
       const res = await list(this.searchParam)
-      this.configList = res.data.records
+      this.templateList = res.data.records
       this.page = res.data
     },
-    handleAddConfig() {
-      this.config = Object.assign({}, defaultConfig)
+    handleAddTemplate() {
+      this.template = Object.assign({}, defaultTemplate)
       this.dialogType = 'new'
       this.dialogVisible = true
     },
@@ -186,36 +206,15 @@ export default {
       this.list(this.searchParam)
     },
     clearAndSearch() {
-      this.searchParam.productType = ''
+      this.searchParam.title = ''
       this.pageChange(1)
     },
-    // handleAddRole() {
-    //   this.role = Object.assign({}, defaultRole)
-    //   if (this.$refs.tree) {
-    //     this.$refs.tree.setCheckedNodes([])
-    //   }
-    //   this.dialogType = 'new'
-    //   this.dialogVisible = true
-    // },
     // 编辑角色信息
     async handleEdit(scope) {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
-      this.config = deepClone(scope.row)
-      // // 根据角色id查询菜单树
-      // var param = {
-      //   'roleIds': [this.role.id]
-      // }
-      // const { success, data } = await getMenuTree(param)
-      // if (success) {
-      //   this.$nextTick(() => {
-      //     // const menus = this.generateRoutes(this.role.menus)
-      //     this.$refs.tree.setCheckedNodes(this.generateArr(data))
-      //     // set checked state of a node not affects its father and child nodes
-      //     this.checkStrictly = false
-      //   })
-      // }
+      this.template = deepClone(scope.row)
     },
     handleDelete({ $index, row }) {
       this.$confirm('Confirm to remove the role?', 'Warning', {
@@ -224,9 +223,9 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          const { success } = await deleteConfig(row.id)
+          const { success } = await deleteTemplate(row.id)
           if (success) {
-            this.configList.splice($index, 1)
+            this.templateList.splice($index, 1)
             this.$message({
               type: 'success',
               message: 'Delete succed!'
@@ -237,32 +236,42 @@ export default {
           console.error(err)
         })
     },
-    async confirmConfig() {
+    async confirmTemplate() {
+      const isEdit = this.dialogType === 'edit'
       let validFlag = true
-      await this.$refs['config'].validate(valid => {
+      await this.$refs['template'].validate(valid => {
         // 验证通过为true，有一个不通过就是false
         if (!valid) {
           validFlag = false
         }
       })
+      // 校验不通过直接返回
       if (!validFlag) {
         return
       }
-      const isEdit = this.dialogType === 'edit'
       // 编辑
       if (isEdit) {
-        await updateConfig(this.config)
-        // for (let index = 0; index < this.configList.length; index++) {
-        //   if (this.configList[index].id === this.config.id) {
-        //     this.configList.splice(index, 1, Object.assign({}, this.config))
-        //     break
-        //   }
-        // }
+        await updateTemplate(this.template)
+        for (let index = 0; index < this.templateList.length; index++) {
+          if (this.templateList[index].id === this.template.id) {
+            this.templateList.splice(index, 1, Object.assign({}, this.template))
+            break
+          }
+        }
       } else {
         // 新增
-        await addConfig(this.config)
+        await addTemplate(this.template)
+        await this.list()
+        // this.template.id = data.id
+        // this.template.code = data.host
+        // this.template.desc = data.port
+        // this.template.title = data.username
+        // this.template.from = data.password
+        // this.template.content = data.protocol
+        // this.template.fileGroupId = data.defaultEncoding
+        // this.template.retryCount = data.properties
+        // this.templateList.push(this.template)
       }
-      await this.list()
       // 通知提示
       // const { roleDesc, roleCode, roleName } = this.role
       this.dialogVisible = false

@@ -2,46 +2,46 @@
   <div class="app-container">
     <div>
       <!-- 搜索 -->
-      <el-input v-model="searchParam.username" placeholder="请输入用户名" style="width: 200px" />
+      <el-input v-model="searchParam.from" placeholder="请输入发送号码" style="width: 200px" />
       <el-button type="primary" style="margin-left: 10px" @click="list">查询</el-button>
       <el-button type="primary" style="margin-left: 10px" @click="clearAndSearch">清空</el-button>
-      <span class="newButton"><el-button type="primary" @click="handleAddConfig">新建</el-button></span>
+      <span class="newButton"><el-button type="primary" @click="handleAddTemplate">新建</el-button></span>
     </div>
     <!-- 表格 -->
-    <el-table :data="configList" style="width: 100%;margin-top:30px;" border>
+    <el-table :data="templateList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="ID" width="220">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="主机名" width="220">
+      <el-table-column align="center" label="发送号码" width="220">
         <template slot-scope="scope">
-          {{ scope.row.host }}
+          {{ scope.row.from }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="端口" width="220">
+      <el-table-column align="center" label="模板配置描述" width="220">
         <template slot-scope="scope">
-          {{ scope.row.port }}
+          {{ scope.row.desc }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="用户名">
+      <el-table-column align="header-center" label="内容类型">
         <template slot-scope="scope">
-          {{ scope.row.username }}
+          {{ scope.row.contentType }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="密码">
+      <el-table-column align="header-center" label="内容">
         <template slot-scope="scope">
-          {{ scope.row.password }}
+          {{ scope.row.content }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="协议">
+      <el-table-column align="header-center" label="文件组ID">
         <template slot-scope="scope">
-          {{ scope.row.protocol }}
+          {{ scope.row.fileGroupId }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="编码">
+      <el-table-column align="header-center" label="重试次数">
         <template slot-scope="scope">
-          {{ scope.row.defaultEncoding }}
+          {{ scope.row.retryCount }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
@@ -61,50 +61,41 @@
 
     <!-- 对话框 -->
     <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'新增'" width="550px">
-      <el-form ref="config" :model="config" :rules="rules" label-width="80px" label-position="right">
+      <el-form ref="template" :model="template" label-width="80px" :rules="rules" label-position="right">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="主机名称" prop="host">
-              <el-input v-model="config.host" placeholder="主机名" />
+            <el-form-item label="发送号码" prop="from">
+              <el-input v-model="template.from" placeholder="发送号码" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="端口" prop="port">
-              <el-input v-model="config.port" placeholder="端口" />
+            <el-form-item label="文件组ID">
+              <el-input v-model="template.fileGroupId" placeholder="文件组ID" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="账号" prop="username">
-              <el-input v-model="config.username" placeholder="账号" />
+            <el-form-item label="内容类型" prop="contentType">
+              <el-input v-model="template.contentType" placeholder="内容类型" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="密码" prop="password">
-              <el-input v-model="config.password" placeholder="密码" />
+            <el-form-item label="重试次数">
+              <el-input v-model="template.retryCount" placeholder="重试次数" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="协议">
-              <el-input v-model="config.protocol" placeholder="协议" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="编码">
-              <el-input v-model="config.defaultEncoding" placeholder="编码" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="其他配置（JSON）">
-          <el-input v-model="config.properties" type="textarea" :rows="5" placeholder="其他配置" />
+        <el-form-item label="模板描述">
+          <el-input v-model="template.desc" type="textarea" :rows="5" placeholder="模板配置描述" />
+        </el-form-item>
+        <el-form-item label="内容" prop="content">
+          <el-input v-model="template.content" type="textarea" :rows="5" placeholder="内容" />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="confirmConfig">确认</el-button>
+        <el-button type="primary" @click="confirmTemplate">确认</el-button>
       </div>
     </el-dialog>
 
@@ -113,18 +104,17 @@
 
 <script>
 import { deepClone } from '@/utils'
-import { deleteConfig, updateConfig, addConfig, list } from '@/api/mail/config'
+import { deleteTemplate, updateTemplate, addTemplate, list } from '@/api/sms-manage/template'
 
 // 默认角色初始化数据
-const defaultConfig = {
+const defaultTemplate = {
   id: '',
-  host: '',
-  port: '',
-  username: '',
-  password: '',
-  protocol: '',
-  defaultEncoding: '',
-  properties: ''
+  contentType: '',
+  desc: '',
+  from: '',
+  content: '',
+  fileGroupId: 0,
+  retryCount: 0
 }
 
 export default {
@@ -133,11 +123,11 @@ export default {
   // 为方便起见，该对象的任何顶级 property 也会直接通过组件实例暴露出来：
   data() {
     return {
-      searchParam: { pageNum: 1, pageSize: 10, protocol: '', defaultEncoding: '' },
-      config: Object.assign({}, defaultConfig),
+      searchParam: { pageNum: 1, pageSize: 10 },
+      template: Object.assign({}, defaultTemplate),
       menus: [],
       page: {},
-      configList: [],
+      templateList: [],
       // rolesList: [],
       dialogVisible: false,
       dialogType: 'new',
@@ -148,18 +138,14 @@ export default {
         label: 'menuName'
       },
       rules: {
-        host: [
-          { required: true, message: '主机名不能为空', trigger: 'blur' }
+        contentType: [
+          { required: true, message: '内容类型不能为空', trigger: 'blur' }
         ],
-        port: [
-          { required: true, message: '端口不能为空', trigger: 'blur' }
+        from: [
+          { required: true, message: '发送者不能为空', trigger: 'blur' }
         ],
-        username: [
-          { required: true, message: '用户名不能为空', trigger: 'blur' }
-        ],
-        password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' }
-          // { min: 6, max: 30, message: '密码6-30位', trigger: 'blur' }
+        content: [
+          { required: true, message: '内容不能为空', trigger: 'blur' }
         ]
       }
     }
@@ -190,11 +176,11 @@ export default {
 
     async list() {
       const res = await list(this.searchParam)
-      this.configList = res.data.records
+      this.templateList = res.data.records
       this.page = res.data
     },
-    handleAddConfig() {
-      this.config = Object.assign({}, defaultConfig)
+    handleAddTemplate() {
+      this.template = Object.assign({}, defaultTemplate)
       this.dialogType = 'new'
       this.dialogVisible = true
     },
@@ -204,36 +190,15 @@ export default {
       this.list(this.searchParam)
     },
     clearAndSearch() {
-      this.searchParam.username = ''
+      this.searchParam.from = ''
       this.pageChange(1)
     },
-    // handleAddRole() {
-    //   this.role = Object.assign({}, defaultRole)
-    //   if (this.$refs.tree) {
-    //     this.$refs.tree.setCheckedNodes([])
-    //   }
-    //   this.dialogType = 'new'
-    //   this.dialogVisible = true
-    // },
     // 编辑角色信息
     async handleEdit(scope) {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
-      this.config = deepClone(scope.row)
-      // // 根据角色id查询菜单树
-      // var param = {
-      //   'roleIds': [this.role.id]
-      // }
-      // const { success, data } = await getMenuTree(param)
-      // if (success) {
-      //   this.$nextTick(() => {
-      //     // const menus = this.generateRoutes(this.role.menus)
-      //     this.$refs.tree.setCheckedNodes(this.generateArr(data))
-      //     // set checked state of a node not affects its father and child nodes
-      //     this.checkStrictly = false
-      //   })
-      // }
+      this.template = deepClone(scope.row)
     },
     handleDelete({ $index, row }) {
       this.$confirm('Confirm to remove the role?', 'Warning', {
@@ -242,9 +207,9 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          const { success } = await deleteConfig(row.id)
+          const { success } = await deleteTemplate(row.id)
           if (success) {
-            this.configList.splice($index, 1)
+            this.templateList.splice($index, 1)
             this.$message({
               type: 'success',
               message: 'Delete succed!'
@@ -255,31 +220,41 @@ export default {
           console.error(err)
         })
     },
-    async confirmConfig() {
+    async confirmTemplate() {
+      const isEdit = this.dialogType === 'edit'
       let validFlag = true
-      await this.$refs['config'].validate(valid => {
+      await this.$refs['template'].validate(valid => {
         // 验证通过为true，有一个不通过就是false
         if (!valid) {
           validFlag = false
         }
       })
+      // 校验不通过直接返回
       if (!validFlag) {
         return
       }
-      const isEdit = this.dialogType === 'edit'
       // 编辑
       if (isEdit) {
-        await updateConfig(this.config)
-        for (let index = 0; index < this.configList.length; index++) {
-          if (this.configList[index].id === this.config.id) {
-            this.configList.splice(index, 1, Object.assign({}, this.config))
+        await updateTemplate(this.template)
+        for (let index = 0; index < this.templateList.length; index++) {
+          if (this.templateList[index].id === this.template.id) {
+            this.templateList.splice(index, 1, Object.assign({}, this.template))
             break
           }
         }
       } else {
         // 新增
-        await addConfig(this.config)
+        await addTemplate(this.template)
         await this.list()
+        // this.template.id = data.id
+        // this.template.code = data.host
+        // this.template.desc = data.port
+        // this.template.title = data.username
+        // this.template.from = data.password
+        // this.template.content = data.protocol
+        // this.template.fileGroupId = data.defaultEncoding
+        // this.template.retryCount = data.properties
+        // this.templateList.push(this.template)
       }
       // 通知提示
       // const { roleDesc, roleCode, roleName } = this.role

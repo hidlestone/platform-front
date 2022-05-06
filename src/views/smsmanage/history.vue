@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { list } from '@/api/sms/history'
+import { list } from '@/api/sms-manage/history'
 
 // 默认角色初始化数据
 const defaultHistory = {

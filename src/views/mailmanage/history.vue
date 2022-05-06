@@ -129,7 +129,7 @@
 <script>
 import path from 'path'
 // import { deepClone } from '@/utils'
-import { list } from '@/api/mail/history'
+import { list } from '@/api/mail-manage/history'
 // import { addRole, deleteRole, getMenuTree, updateRole } from '@/api/role'
 
 // 默认角色初始化数据
