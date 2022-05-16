@@ -76,7 +76,7 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { addRole, deleteRole, getMenuTree, getRoles, updateRole } from '@/system-manage/api/role'
+import { addRole, deleteRole, getMenuTree, getRoles, updateRole } from '@/api/system-manage/role'
 
 // 默认角色初始化数据
 const defaultRole = {

@@ -73,7 +73,7 @@ const actions = {
               name: childrenTmp[i].name,
               meta: {
                 title: childrenTmp[i].meta.title,
-                /*  icon: childrenTmp[i].meta.icon,*/
+                icon: childrenTmp[i].meta.icon,
                 roles: ['admin']
               }
             }
