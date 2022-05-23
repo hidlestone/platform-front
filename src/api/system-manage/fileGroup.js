@@ -19,7 +19,7 @@ export function getFileGroup(id) {
 }
 
 // 分页查询文件组
-export function listDict(data) {
+export function listFileGroup(data) {
   return request({
     url: '/filegroup/list',
     method: 'post',
