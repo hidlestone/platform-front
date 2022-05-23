@@ -48,7 +48,6 @@
         <el-table-column label="图标" align="center">
           <template slot-scope="scope">
             <svg-icon :icon-class="scope.row.icon" />
-            <!--<i class={[scope.row.icon,'sub-el-icon']} />-->
           </template>
         </el-table-column>
         <el-table-column label="排序" align="center">

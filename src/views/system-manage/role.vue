@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-button type="primary" @click="handleAddRole">New Role</el-button>
-    <!-- 表格 -->
+    <!-- 角色列表 -->
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="ID" width="220">
         <template slot-scope="scope">
