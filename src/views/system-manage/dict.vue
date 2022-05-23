@@ -30,6 +30,9 @@
           <el-table-column label="编码" align="center">
             <template slot-scope="scope">{{ scope.row.code }}</template>
           </el-table-column>
+          <el-table-column label="名称" align="center">
+            <template slot-scope="scope">{{ scope.row.value }}</template>
+          </el-table-column>
           <el-table-column label="描述" align="center">
             <template slot-scope="scope">{{ scope.row.desc }}</template>
           </el-table-column>
@@ -45,13 +48,13 @@
 
 <script>
 // 数据字典接口
-import { deleteDict, getDict, listDict, saveDict, updateDict } from '@/api/system-manage/dict'
+import { deleteDict, getDict, listDict, saveDict, updateDict, getAllDicts } from '@/api/system-manage/dict'
 
 export default {
   // name: 'MenuManagement',
   data() {
     return {
-      data: [],
+      dictList: [],
       list: [],
       listLoading: true,
       elementLoadingText: '正在加载...'
@@ -59,9 +62,10 @@ export default {
   },
   async created() {
     // 查询所有的数据字典项
-    const roleData = await getTree()
-    this.data = roleData.data
-    this.fetchData()
+    const resp = await getAllDicts()
+    this.dictList = resp.data
+    console.info('--- getAllDicts ---')
+    console.info(dictList)
   },
   methods: {
     handleEdit(row) {
