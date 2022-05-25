@@ -43,17 +43,32 @@
       </el-col>
     </el-row>
 
+    <!-- 对话框 -->
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'Edit Role':'New Role'">
+      <el-form :model="role" label-width="80px" label-position="left">
+        <!--<el-form-item label="ID">
+          <el-input v-model="role.id" placeholder="Role ID" />
+        </el-form-item>-->
+      </el-form>
+      <div style="text-align:right;">
+        <el-button type="danger" @click="dialogVisible=false">Cancel</el-button>
+        <el-button type="primary" @click="confirmRole">Confirm</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 // 数据字典接口
-import { deleteDict, getDict, listDict, saveDict, updateDict, getAllDicts } from '@/api/system-manage/dict'
+import { deleteDict, getAllDicts, getDict, listDict, saveDict, updateDict } from '@/api/system-manage/dict'
 
 export default {
   // name: 'MenuManagement',
   data() {
     return {
+      dialogVisible: false,
+      dialogType: 'new',
       dictList: [],
       list: [],
       listLoading: true,
